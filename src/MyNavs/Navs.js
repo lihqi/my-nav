@@ -1,16 +1,16 @@
 import React, { Component } from "react";
 import debounce from "lodash/debounce";
 import MoreContent from "./MoreContent";
-import ResizeObserver from "resize-observer-polyfill";
+import { ResizeObserver } from "resize-observer";
 const renderData = (data, saveRef, heightStr) => {
-    return data.map(item => renderListItem(item, saveRef, heightStr));
+    return data.map((item) => renderListItem(item, saveRef, heightStr));
 };
 const renderListItem = (item, saveRef, heightStr) => {
     return (
         <li key={item.key} className="list-item" ref={saveRef("" + item.key)}>
             <p
                 style={{
-                    lineHeight: heightStr
+                    lineHeight: heightStr,
                 }}
             >
                 {item.text}
@@ -22,7 +22,7 @@ export default class Navs extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            sliceIndex: null
+            sliceIndex: null,
         };
     }
     render() {
@@ -42,14 +42,14 @@ export default class Navs extends Component {
             <div
                 className="navs-wrap"
                 style={{
-                    height: heightStr
+                    height: heightStr,
                 }}
             >
                 <ul
                     ref={saveRef("root")}
                     className="clearfix list"
                     style={{
-                        overflow: "hidden"
+                        overflow: "hidden",
                     }}
                 >
                     {sliceIndex === null
@@ -70,7 +70,7 @@ export default class Navs extends Component {
     handler() {
         this.setState(
             {
-                sliceIndex: null
+                sliceIndex: null,
             },
             () => {
                 const { data = [] } = this.props;
@@ -84,11 +84,11 @@ export default class Navs extends Component {
                     if (liWidthCount > ulWidth) {
                         if (preLiWidthCount + 72 > ulWidth) {
                             this.setState({
-                                sliceIndex: index - 1
+                                sliceIndex: index - 1,
                             });
                         } else {
                             this.setState({
-                                sliceIndex: index
+                                sliceIndex: index,
                             });
                         }
                     }
@@ -108,15 +108,9 @@ export default class Navs extends Component {
         this.debouncedResize = debounce(() => {
             this.handler();
         }, 100);
-        this.resizeObserver = new ResizeObserver(this.debouncedResize);
-        this.resizeObserver.observe(this.props.getRef("root"));
-    }
-    componentWillUnmount() {
-        if (this.resizeObserver) {
-            this.resizeObserver.disconnect();
-        }
-        if (this.debouncedResize && this.debouncedResize.cancel) {
-            this.debouncedResize.cancel();
-        }
+        const ro = new ResizeObserver((entries, observer) => {
+            this.debouncedResize();
+        });
+        ro.observe(this.props.getRef("root"));
     }
 }
